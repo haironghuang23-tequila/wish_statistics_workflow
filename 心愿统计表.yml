@@ -1,0 +1,1344 @@
+app:
+  description: 上传Excel/照片/文字 → 自动提取物品并七分类计数 → 追加到固定心愿统计表（每半月一个sheet）。匿名可用。
+  icon: 📊
+  icon_background: '#DCE9FF'
+  icon_type: emoji
+  mode: workflow
+  name: 心愿统计表
+  use_icon_as_answer_icon: false
+dependencies:
+- current_identifier: null
+  type: marketplace
+  value:
+    marketplace_plugin_unique_identifier: langgenius/deepseek:0.0.25@32f56796c4f9c3949f2a8cde44a5912f347b5a141dd7daf100048aeefd5e6593
+    version: null
+kind: app
+version: 0.7.0
+workflow:
+  conversation_variables: []
+  environment_variables:
+  - description: 飞书自建应用 App ID
+    id: 3c096226-82d2-4ebb-a45b-1e090c7ee0dd
+    name: FEISHU_APP_ID
+    selector:
+    - env
+    - FEISHU_APP_ID
+    value: cli_aa5f39c03a63dc02
+    value_type: string
+  - description: 飞书自建应用 App Secret
+    id: f9488999-3b89-4791-b035-14c5dd357681
+    name: FEISHU_APP_SECRET
+    selector:
+    - env
+    - FEISHU_APP_SECRET
+    value: ""
+    value_type: secret
+  features:
+    file_upload:
+      allowed_file_extensions: []
+      allowed_file_types:
+      - image
+      - document
+      allowed_file_upload_methods:
+      - local_file
+      - remote_url
+      enabled: false
+      fileUploadConfig:
+        attachment_image_file_size_limit: 2
+        audio_file_size_limit: 50
+        batch_count_limit: 5
+        file_size_limit: 15
+        file_upload_limit: 50
+        image_file_batch_limit: 10
+        image_file_size_limit: 10
+        knowledge_file_size_limit: 15
+        single_chunk_attachment_limit: 10
+        skill_file_size_limit: 50
+        video_file_size_limit: 100
+        workflow_file_upload_limit: 10
+      image:
+        enabled: false
+        number_limits: 3
+        transfer_methods:
+        - local_file
+        - remote_url
+      number_limits: 3
+    opening_statement: ''
+    retriever_resource:
+      enabled: false
+    sensitive_word_avoidance:
+      enabled: false
+    speech_to_text:
+      enabled: false
+    suggested_questions: []
+    suggested_questions_after_answer:
+      enabled: false
+    text_to_speech:
+      enabled: false
+      language: ''
+      voice: ''
+  graph:
+    edges:
+    - data:
+        isInIteration: false
+        isInLoop: false
+        sourceType: start
+        targetType: llm
+      id: start-source-llm_vision-target
+      selected: false
+      source: start
+      sourceHandle: source
+      target: llm_vision
+      targetHandle: target
+      type: custom
+      zIndex: 0
+    - data:
+        isInIteration: false
+        isInLoop: false
+        sourceType: llm
+        targetType: document-extractor
+      id: llm_vision-source-doc_extract-target
+      selected: false
+      source: llm_vision
+      sourceHandle: source
+      target: doc_extract
+      targetHandle: target
+      type: custom
+      zIndex: 0
+    - data:
+        isInIteration: false
+        isInLoop: false
+        sourceType: document-extractor
+        targetType: code
+      id: doc_extract-source-code_parse-target
+      selected: false
+      source: doc_extract
+      sourceHandle: source
+      target: code_parse
+      targetHandle: target
+      type: custom
+      zIndex: 0
+    - data:
+        isInIteration: false
+        isInLoop: false
+        sourceType: code
+        targetType: iteration
+      id: code_parse-source-iter_batch-target
+      selected: false
+      source: code_parse
+      sourceHandle: source
+      target: iter_batch
+      targetHandle: target
+      type: custom
+      zIndex: 0
+    - data:
+        isInIteration: false
+        isInLoop: false
+        sourceType: iteration
+        targetType: code
+      id: iter_batch-source-code_agg-target
+      selected: false
+      source: iter_batch
+      sourceHandle: source
+      target: code_agg
+      targetHandle: target
+      type: custom
+      zIndex: 0
+    - data:
+        isInIteration: false
+        isInLoop: false
+        sourceType: code
+        targetType: http-request
+      id: code_agg-source-http_token-target
+      selected: false
+      source: code_agg
+      sourceHandle: source
+      target: http_token
+      targetHandle: target
+      type: custom
+      zIndex: 0
+    - data:
+        isInIteration: false
+        isInLoop: false
+        sourceType: http-request
+        targetType: code
+      id: http_token-source-code_token-target
+      selected: false
+      source: http_token
+      sourceHandle: source
+      target: code_token
+      targetHandle: target
+      type: custom
+      zIndex: 0
+    - data:
+        isInIteration: false
+        isInLoop: false
+        sourceType: http-request
+        targetType: code
+      id: http_create-source-code_create-target
+      selected: false
+      source: http_create
+      sourceHandle: source
+      target: code_create
+      targetHandle: target
+      type: custom
+      zIndex: 0
+    - data:
+        isInIteration: false
+        isInLoop: false
+        sourceType: http-request
+        targetType: http-request
+      id: http_write-source-http_style-target
+      selected: false
+      source: http_write
+      sourceHandle: source
+      target: http_style
+      targetHandle: target
+      type: custom
+      zIndex: 0
+    - data:
+        isInIteration: false
+        isInLoop: false
+        sourceType: http-request
+        targetType: http-request
+      id: http_style-source-http_share-target
+      selected: false
+      source: http_style
+      sourceHandle: source
+      target: http_share
+      targetHandle: target
+      type: custom
+      zIndex: 0
+    - data:
+        isInIteration: false
+        isInLoop: false
+        sourceType: http-request
+        targetType: end
+      id: http_share-source-end-target
+      selected: false
+      source: http_share
+      sourceHandle: source
+      target: end
+      targetHandle: target
+      type: custom
+      zIndex: 0
+    - data:
+        isInIteration: true
+        isInLoop: false
+        iteration_id: iter_batch
+        sourceType: iteration-start
+        targetType: llm
+      id: iter_batch_start-source-llm_extract-target
+      selected: false
+      source: iter_batch_start
+      sourceHandle: source
+      target: llm_extract
+      targetHandle: target
+      type: custom
+      zIndex: 1001
+    - data:
+        isInIteration: false
+        isInLoop: false
+        sourceType: code
+        targetType: http-request
+      id: code_token-http_query
+      source: code_token
+      sourceHandle: source
+      target: http_query
+      targetHandle: target
+      type: custom
+      zIndex: 0
+    - data:
+        isInIteration: false
+        isInLoop: false
+        sourceType: http-request
+        targetType: http-request
+      id: http_query-http_create
+      source: http_query
+      sourceHandle: source
+      target: http_create
+      targetHandle: target
+      type: custom
+      zIndex: 0
+    - data:
+        isInIteration: false
+        isInLoop: false
+        sourceType: code
+        targetType: http-request
+      id: code_create-source-http_read-target
+      selected: false
+      source: code_create
+      sourceHandle: source
+      target: http_read
+      targetHandle: target
+      type: custom
+      zIndex: 0
+    - data:
+        isInIteration: false
+        isInLoop: false
+        sourceType: http-request
+        targetType: code
+      id: http_read-source-code_merge-target
+      selected: false
+      source: http_read
+      sourceHandle: source
+      target: code_merge
+      targetHandle: target
+      type: custom
+      zIndex: 0
+    - data:
+        isInIteration: false
+        isInLoop: false
+        sourceType: code
+        targetType: http-request
+      id: code_merge-source-http_write-target
+      selected: false
+      source: code_merge
+      sourceHandle: source
+      target: http_write
+      targetHandle: target
+      type: custom
+      zIndex: 0
+    nodes:
+    - data:
+        desc: ''
+        selected: false
+        title: 开始
+        type: start
+        variables:
+        - label: 手动文字
+          max_length: 100000
+          options: []
+          required: false
+          type: paragraph
+          variable: text
+        - allowed_file_extensions: []
+          allowed_file_types:
+          - image
+          allowed_file_upload_methods:
+          - local_file
+          - remote_url
+          label: 心愿照片
+          number_limits: 1
+          required: false
+          type: file
+          variable: photo
+        - allowed_file_extensions:
+          - .xlsx
+          - .xls
+          - .csv
+          allowed_file_types:
+          - document
+          allowed_file_upload_methods:
+          - local_file
+          label: 星云导出Excel
+          number_limits: 1
+          required: false
+          type: file
+          variable: file
+        - label: 日期（填如2026-09-20，自动归入上/下半月；也可填周期如9.16-9.30；留空按今天）
+          max_length: 30
+          options: []
+          required: false
+          type: text-input
+          variable: period
+      height: 186
+      id: start
+      position:
+        x: 0
+        y: 0
+      positionAbsolute:
+        x: 0
+        y: 0
+      selected: false
+      sourcePosition: right
+      targetPosition: left
+      type: custom
+      width: 242
+      zIndex: 0
+    - data:
+        context:
+          enabled: false
+          variable_selector: []
+        desc: ''
+        model:
+          completion_params:
+            temperature: 0.1
+          mode: chat
+          name: deepseek-v4-flash-vision-exp
+          provider: langgenius/deepseek/deepseek
+        prompt_template:
+        - id: a1111111-1111-1111-1111-111111111111
+          role: system
+          text: '你是电商心愿照片识别助手。只针对照片中“许愿人本人想要”的那件商品，输出一行商品描述，不要解释、不要 JSON。
+
+            输出顺序：品牌（中英文都写，如“COACH 蔻驰”）+ 系列或型号（仅当图中出现明确文字时才写，例如页面标题、吊牌、包装；图中没有就省略，严禁猜测或编造）+
+            品类 + 颜色 + 材质或花纹 + 款式（单肩/斜挎/手提等）+ 尺寸（仅当图中有人物或参照物可比较时写小/中/大，否则省略）。
+
+            能看清的限定词必须全部保留，不要概括成“包”“鞋”“衣服”这类大类。
+
+            不要输出价格、销量、店铺名、按钮、导航、评论区他人留言。
+
+            如果是商品详情页或订单页，优先使用页面上的商品标题（含型号与规格）。
+
+            如果是评论或聊天截图，只输出发布者本人的那一条心愿。
+
+            同时出现多个商品时，只输出许愿人明确想要的那个；无法判断时输出最突出的那个。
+
+            没有可识别商品时输出空字符串。'
+        - id: a1111111-1111-1111-1111-111111111112
+          role: user
+          text: 请识别图片中的心愿留言文字。
+        selected: false
+        title: 照片转文字
+        type: llm
+        variables: []
+        vision:
+          configs:
+            detail: high
+            variable_selector:
+            - start
+            - photo
+          enabled: true
+      height: 87
+      id: llm_vision
+      position:
+        x: 342
+        y: 66.66666666666667
+      positionAbsolute:
+        x: 342
+        y: 66.66666666666667
+      selected: false
+      sourcePosition: right
+      targetPosition: left
+      type: custom
+      width: 241
+      zIndex: 0
+    - data:
+        isInIteration: false
+        is_array_file: false
+        selected: false
+        title: 文档提取器
+        type: document-extractor
+        variable_selector:
+        - start
+        - file
+      height: 103
+      id: doc_extract
+      position:
+        x: 684
+        y: 92.00000000000001
+      positionAbsolute:
+        x: 684
+        y: 92.00000000000001
+      selected: false
+      sourcePosition: right
+      targetPosition: left
+      type: custom
+      width: 241
+      zIndex: 0
+    - data:
+        code: "import json\n\ndef main(text, ocr, doc_text, period):\n    msgs = []\n\
+          \    if doc_text and str(doc_text).strip():\n        for s in parse_md_table(str(doc_text)):\n\
+          \            if s:\n                msgs.append({\"text\": s, \"source\"\
+          : \"Excel导入\"})\n    if ocr and str(ocr).strip():\n        for line in [str(ocr).strip()]:\n\
+          \            line = line.strip()\n            if line:\n               \
+          \ msgs.append({\"text\": line, \"source\": \"照片\"})\n    if text and str(text).strip():\n\
+          \        for line in str(text).splitlines():\n            line = line.strip()\n\
+          \            if line:\n                msgs.append({\"text\": line, \"source\"\
+          : \"手动文字\"})\n    chunks = []\n    for i in range(0, len(msgs), 20):\n \
+          \       chunks.append(json.dumps(msgs[i:i+20], ensure_ascii=False))\n  \
+          \  if not chunks:\n        chunks = [json.dumps([], ensure_ascii=False)]\n\
+          \    if any(m[\"source\"] == \"Excel导入\" for m in msgs):\n        source\
+          \ = \"Excel导入\"\n    elif any(m[\"source\"] == \"照片\" for m in msgs):\n\
+          \        source = \"照片\"\n    else:\n        source = \"手动文字\"\n    return\
+          \ {\"chunks\": chunks, \"source\": source, \"count\": len(msgs)}\n\ndef\
+          \ split_row(l):\n    parts = l.split(\"|\")\n    if parts and parts[0].strip()\
+          \ == \"\":\n        parts = parts[1:]\n    if parts and parts[-1].strip()\
+          \ == \"\":\n        parts = parts[:-1]\n    return parts\n\ndef parse_md_table(t):\n\
+          \    lines = [l.strip() for l in t.splitlines() if l.strip()]\n    header_idx\
+          \ = None\n    for i, l in enumerate(lines):\n        if l.startswith(\"\
+          |\") and \"|\" in l[1:]:\n            header_idx = i\n            break\n\
+          \    if header_idx is None:\n        return [l for l in lines]\n    target\
+          \ = None\n    for j, c in enumerate(split_row(lines[header_idx])):\n   \
+          \     if c.strip() in (\"心愿描述\", \"心愿\", \"描述\"):\n            target =\
+          \ j\n    start = header_idx + 1\n    if start < len(lines):\n        sep\
+          \ = lines[start].replace(\"|\", \"\").replace(\"-\", \"\").replace(\":\"\
+          , \"\").replace(\" \", \"\")\n        if sep == \"\":\n            start\
+          \ += 1\n    out = []\n    for l in lines[start:]:\n        if not l.startswith(\"\
+          |\"):\n            continue\n        cs = split_row(l)\n        if target\
+          \ is not None and target < len(cs):\n            v = cs[target].strip()\n\
+          \            if v:\n                out.append(v)\n        else:\n     \
+          \       row = \" \".join(x.strip() for x in cs if x.strip())\n         \
+          \   if row:\n                out.append(row)\n    return out"
+        code_language: python3
+        desc: 统一解析三种输入并每20条切一批
+        isInIteration: false
+        outputs:
+          chunks:
+            children: null
+            type: array[string]
+          count:
+            children: null
+            type: number
+          source:
+            children: null
+            type: string
+        selected: false
+        title: 解析并切批
+        type: code
+        variables:
+        - value_selector:
+          - start
+          - text
+          variable: text
+        - value_selector:
+          - llm_vision
+          - text
+          variable: ocr
+        - value_selector:
+          - doc_extract
+          - text
+          variable: doc_text
+        - value_selector:
+          - start
+          - period
+          variable: period
+      height: 79
+      id: code_parse
+      position:
+        x: 1026
+        y: 121.33333333333334
+      positionAbsolute:
+        x: 1026
+        y: 121.33333333333334
+      selected: false
+      sourcePosition: right
+      targetPosition: left
+      type: custom
+      width: 241
+      zIndex: 0
+    - data:
+        desc: ''
+        error_handle_mode: terminated
+        height: 266
+        is_parallel: true
+        iterator_selector:
+        - code_parse
+        - chunks
+        output_selector:
+        - llm_extract
+        - text
+        output_type: array[string]
+        parallel_nums: 10
+        selected: false
+        start_node_id: iter_batch_start
+        title: 分批提取
+        type: iteration
+        width: 486
+      height: 266
+      id: iter_batch
+      position:
+        x: 1356.8072070433357
+        y: 66.66666666666667
+      positionAbsolute:
+        x: 1356.8072070433357
+        y: 66.66666666666667
+      selected: false
+      sourcePosition: right
+      targetPosition: left
+      type: custom
+      width: 486
+      zIndex: 0
+    - data:
+        desc: ''
+        isInIteration: true
+        selected: false
+        title: ''
+        type: iteration-start
+      draggable: false
+      height: 48
+      id: iter_batch_start
+      parentId: iter_batch
+      position:
+        x: 60
+        y: 101
+      positionAbsolute:
+        x: 1416.8072070433357
+        y: 167.66666666666669
+      selectable: false
+      selected: false
+      sourcePosition: right
+      targetPosition: left
+      type: custom-iteration-start
+      width: 44
+      zIndex: 1001
+    - data:
+        context:
+          enabled: false
+          variable_selector: []
+        desc: 提取物品并七分类
+        isInIteration: true
+        iteration_id: iter_batch
+        model:
+          completion_params:
+            temperature: 0.1
+          mode: chat
+          name: deepseek-v4-flash
+          provider: langgenius/deepseek/deepseek
+        prompt_template:
+        - id: b2222222-2222-2222-2222-222222222221
+          role: system
+          text: '你是电商直播「心愿留言」的物品提取与分类专家。下面给你一批留言（JSON数组，每个元素含text）。请对每句提取用户真正想买的【物品】并归入唯一分类。
+
+
+            提取规则（严格遵守）：
+
+
+            1. 只保留“商品名称 + 名称前面重要的形容词/限定词”，禁止保留任何动词（想要/希望/准备/需要/许愿/出一款/改善/带娃/相信等一律删除）。
+
+
+            2. 必须保留且按原文顺序、不改写不调序：品牌、适用人群（男士/女士/宝宝/儿童/孕妇/高个子等）、年龄、材质、颜色、款式（一次性/三合一/半掌/厚底/长款/飞行员等）、功能（防脱/盖白发/多功能等）、包装、规格（容量/尺码/升数）。
+
+
+            3. 叠词折叠：巨巨巨→巨；口红杯口红杯→口红杯；祛痘祛痘膏→祛痘膏。
+
+
+            4. 场景/季节/场合删除，且场景不构成商品区分时合并核心词：徒步冲锋衣、户外冲锋衣→冲锋衣；旅游护颈枕→护颈枕；秋冬打底袜→打底袜。已成为商品名一部分的保留（滑雪镜、露营车、运动鞋）。
+
+
+            5. 一句话可含多个物品，分别提取；同一句内重复物品只算一次。但品牌、型号、颜色、规格、款式属于同一个商品名，必须合并成一个物品，不能拆成多个
+            items；只有用“和/、/还有”明确并列的不同商品才拆开。
+
+
+            6. 没有明确物品（纯夸赞、售后、建议、问链接）时 items 返回 []。
+
+
+            7. 如果输入元素的 source 是“照片”，最多只输出 1 个主要物品；只提取许愿人本人的主商品，不要提取评论区其他人的商品。
+
+
+            8. 商品名要精简，但不能丢关键限定词：
+
+            - 品牌中英文同时出现时只保留一个（优先中文），例如 gregory格里高利 → 格里高利。
+
+            - 必须保留：颜色、材质或花纹、决定款式的词（单肩/斜挎/手提/厚底/长款等）；同义重复只留一个（经典C字老花 → 老花）。
+
+            - 尺码、容量、尺寸只在原文明确写出，或照片中能与人物/参照物比较时保留；不确定就省略，禁止猜测。
+
+            - 删除“男女同款/同款/徒步登山/户外”等营销修饰和“的”。
+
+            - 来源是照片时，不要概括成“包/鞋/衣服”这类大类，也不要删掉颜色、材质、款式。
+
+            示例：gregory格里高利 Amber系列徒步登山双肩包男女同款 苔藓绿 34L → 格里高利 Amber系列双肩包 苔藓绿 34L；COACH
+            蔻驰 单肩斜挎包 棕色 PVC 经典C字老花 中号 → 蔻驰 棕色 PVC 老花 单肩斜挎包 中号。
+
+
+            七分类（名称必须完全一致）：
+
+
+            - 洗护用品：洗发/沐浴/牙膏/身体乳/护手霜/卫生巾/一次性内裤/清洁剂
+
+
+            - 鞋服：鞋、帽、衣、裤、袜、围巾、普通内裤、防晒衣帽
+
+
+            - 食品保健：零食、生鲜、饮料、保健品、膏药贴布
+
+
+            - 美妆护肤：面霜/眼霜/精华/彩妆/卸妆/涂脸的防晒
+
+
+            - 百货：厨具、收纳、家居杂货、清洁工具
+
+
+            - 数码家电：大小家电、电子数码
+
+
+            - 箱包：背包、行李箱、包包、钱包
+
+
+            只输出JSON数组（不要markdown代码块、不要解释），长度与输入一致：
+
+
+            [{"text":"原留言","items":[{"name":"物品名（含重要修饰）","category":"分类名"}]}]
+
+
+            示例：
+
+            输入 [{"text":"想要黑色半掌袜子"},{"text":"国庆节带娃出去徒步冲锋衣"}]
+
+            输出 [{"text":"想要黑色半掌袜子","items":[{"name":"黑色半掌袜子","category":"鞋服"}]},{"text":"国庆节带娃出去徒步冲锋衣","items":[{"name":"冲锋衣","category":"鞋服"}]}]'
+        - id: b2222222-2222-2222-2222-222222222222
+          role: user
+          text: 以下是本批留言（JSON数组）：{{#iter_batch.item#}}
+        reasoning_format: separated
+        retry_config:
+          max_retries: 5
+          retry_enabled: true
+          retry_interval: 2000
+        selected: false
+        title: 提取物品+分类
+        type: llm
+        variables: []
+        vision:
+          enabled: false
+      height: 144
+      id: llm_extract
+      parentId: iter_batch
+      position:
+        x: 184
+        y: 60
+      positionAbsolute:
+        x: 1540.8072070433357
+        y: 126.66666666666667
+      selected: false
+      sourcePosition: right
+      targetPosition: left
+      type: custom
+      width: 241
+      zIndex: 1001
+    - data:
+        code: "import json\nimport re\nimport datetime\nfrom collections import Counter,\
+          \ defaultdict\n\nCATS = [\"洗护用品\", \"鞋服\", \"食品保健\", \"美妆护肤\", \"百货\", \"\
+          数码家电\", \"箱包\"]\n\ndef to_period(p):\n    s = (p or '').strip()\n    if\
+          \ re.match(r'^\\d{1,2}\\.\\d{1,2}-\\d{1,2}\\.\\d{1,2}$', s):\n        return\
+          \ s\n    y = mo = dd = None\n    m = re.match(r'^(\\d{4})[-/.](\\d{1,2})[-/.](\\\
+          d{1,2})', s)\n    if m:\n        y, mo, dd = int(m.group(1)), int(m.group(2)),\
+          \ int(m.group(3))\n    else:\n        m2 = re.match(r'^(\\d{1,2})[-/.](\\\
+          d{1,2})$', s)\n        if m2:\n            mo, dd = int(m2.group(1)), int(m2.group(2))\n\
+          \            y = datetime.datetime.now(datetime.timezone(datetime.timedelta(hours=8))).year\n\
+          \    if not mo and not s:\n        now = datetime.datetime.now(datetime.timezone(datetime.timedelta(hours=8)))\n\
+          \        y, mo, dd = now.year, now.month, now.day\n    if mo:\n        days\
+          \ = [31,28,31,30,31,30,31,31,30,31,30,31]\n        if mo == 2 and ((y %\
+          \ 4 == 0 and y % 100 != 0) or y % 400 == 0):\n            days[1] = 29\n\
+          \        if dd <= 15:\n            return '%d.1-%d.15' % (mo, mo)\n    \
+          \    return '%d.16-%d.%d' % (mo, mo, days[mo-1])\n    return s or '未命名'\n\
+          \ndef extract_json(raw):\n    if not isinstance(raw, str):\n        return\
+          \ raw\n    s = raw.strip()\n    fence = re.search(r'```(?:json)?\\s*(.*?)```',\
+          \ s, re.S)\n    if fence:\n        s = fence.group(1).strip()\n    try:\n\
+          \        return json.loads(s)\n    except Exception:\n        pass\n   \
+          \ s = re.sub(r'<think\\b[^>]*>.*?</think>', '', s, flags=re.S)\n    s =\
+          \ s.replace('<!--dify-deepseek-reasoning-->', '')\n    first, last = s.find('['),\
+          \ s.rfind(']')\n    if first != -1 and last > first:\n        try:\n   \
+          \         return json.loads(s[first:last+1])\n        except Exception:\n\
+          \            pass\n    first, last = s.find('{'), s.rfind('}')\n    if first\
+          \ != -1 and last > first:\n        try:\n            return json.loads(s[first:last+1])\n\
+          \        except Exception:\n            pass\n    return None\n\ndef _canon(name):\n\
+          \    s = (name or '').strip()\n    if '格里高利' in s:\n        s = s.replace('gregory',\
+          \ '').replace('GREGORY', '')\n    for w in ['男女同款', '徒步登山', '同款', '户外',\
+          \ '的']:\n        s = s.replace(w, '')\n    s = re.sub(r'\\s*(苔藓绿|黑色|白色|粉色|蓝色|绿色|红色|灰色|米色|棕色|黄色|紫色|橙色)\\\
+          s*', ' ', s)\n    s = re.sub(r'\\s*\\d+(?:\\.\\d+)?\\s*(?:L|升|ml|ML|cm|CM|寸|码)',\
+          \ ' ', s)\n    s = re.sub(r'\\s+', ' ', s).strip()\n    return s\n\ndef\
+          \ _add_item(cnt, name, cat):\n    name = _canon(name)\n    cat = (cat or\
+          \ '').strip()\n    if name and cat in CATS:\n        cnt[(name, cat)] +=\
+          \ 1\n\ndef main(batches, period, source):\n    cnt = Counter()\n    for\
+          \ b in (batches or []):\n        arr = extract_json(b)\n        if arr is\
+          \ None:\n            continue\n        if isinstance(arr, dict):\n     \
+          \       arr = [arr]\n        if not isinstance(arr, list):\n           \
+          \ continue\n        for row in arr:\n            if not isinstance(row,\
+          \ dict):\n                continue\n            items = row.get('items')\n\
+          \            if items is None:\n                _add_item(cnt, row.get('name')\
+          \ or row.get('text'), row.get('category'))\n                continue\n \
+          \           for it in items:\n                if isinstance(it, dict):\n\
+          \                    _add_item(cnt, it.get('name') or it.get('text'), it.get('category'))\n\
+          \    by = defaultdict(list)\n    for (name, cat), n in cnt.items():\n  \
+          \      by[cat].append((name, n))\n    for cat in by:\n        by[cat].sort(key=lambda\
+          \ x: (-x[1], x[0]))\n    maxrows = max([len(by[c]) for c in CATS] + [1])\n\
+          \    header = []\n    for c in CATS:\n        header += [c, \"许愿人次\"]\n\
+          \    rows = [header]\n    for i in range(maxrows):\n        r = []\n   \
+          \     for c in CATS:\n            if i < len(by[c]):\n                r\
+          \ += [by[c][i][0], by[c][i][1]]\n            else:\n                r +=\
+          \ [\"\", \"\"]\n        rows.append(r)\n    while len(rows) < 121:\n   \
+          \     rows.append([\"\"] * 14)\n    total = sum(cnt.values())\n    kinds\
+          \ = len(cnt)\n    sn = to_period(period)\n    body_range = \"A1:N%d\" %\
+          \ len(rows)\n    header_only = \"A1:N1\"\n    table_url = \"https://my.feishu.cn/sheets/QlJTseUX6h1mDFtX0NeclW8rn2h\"\
+          \n    summary = \"半月周期：%s\\n物品种类：%d\\n总许愿人次：%d\\n统计表：%s\" % (sn, kinds,\
+          \ total, table_url)\n    return {\n        \"values_json\": json.dumps(rows,\
+          \ ensure_ascii=False),\n        \"body_range\": body_range,\n        \"\
+          header_only\": header_only,\n        \"sheet_title\": sn,\n        \"table_url\"\
+          : table_url,\n        \"summary\": summary,\n        \"total\": total,\n\
+          \        \"kinds\": kinds,\n    }\n"
+        code_language: python3
+        desc: 聚合计数并生成横向并排二维数组
+        isInIteration: false
+        outputs:
+          body_range:
+            children: null
+            type: string
+          header_only:
+            children: null
+            type: string
+          kinds:
+            children: null
+            type: number
+          sheet_title:
+            children: null
+            type: string
+          summary:
+            children: null
+            type: string
+          table_url:
+            children: null
+            type: string
+          total:
+            children: null
+            type: number
+          values_json:
+            children: null
+            type: string
+        selected: false
+        title: 聚合并生成表格
+        type: code
+        variables:
+        - value_selector:
+          - iter_batch
+          - output
+          variable: batches
+        - value_selector:
+          - start
+          - period
+          variable: period
+        - value_selector:
+          - code_parse
+          - source
+          variable: source
+      height: 79
+      id: code_agg
+      position:
+        x: 1947.1078098700177
+        y: 121.33333333333334
+      positionAbsolute:
+        x: 1947.1078098700177
+        y: 121.33333333333334
+      selected: false
+      sourcePosition: right
+      targetPosition: left
+      type: custom
+      width: 241
+      zIndex: 0
+    - data:
+        authorization:
+          config: null
+          type: no-auth
+        body:
+          data:
+          - type: text
+            value: '{"app_id":"{{#env.FEISHU_APP_ID#}}","app_secret":"{{#env.FEISHU_APP_SECRET#}}"}'
+          type: json
+        desc: 获取飞书访问令牌
+        headers: ''
+        method: post
+        params: ''
+        retry_config:
+          max_retries: 3
+          retry_enabled: true
+          retry_interval: 100
+        selected: false
+        ssl_verify: true
+        timeout:
+          connect: 2
+          max_connect_timeout: 0
+          max_read_timeout: 0
+          max_write_timeout: 0
+          read: 2
+          write: 2
+        title: 获取飞书Token
+        type: http-request
+        url: https://open.feishu.cn/open-apis/auth/v3/tenant_access_token/internal
+        variables: []
+      height: 180
+      id: http_token
+      position:
+        x: 2261.6395878664316
+        y: 121.33333333333334
+      positionAbsolute:
+        x: 2261.6395878664316
+        y: 121.33333333333334
+      selected: false
+      sourcePosition: right
+      targetPosition: left
+      type: custom
+      width: 241
+      zIndex: 0
+    - data:
+        code: "import json\n\ndef main(body):\n    try:\n        b = json.loads(body)\
+          \ if isinstance(body, str) else body\n        token = b.get(\"tenant_access_token\"\
+          , \"\") if isinstance(b, dict) else \"\"\n    except Exception:\n      \
+          \  token = \"\"\n    return {\"token\": token}"
+        code_language: python3
+        desc: 从Token响应中解析 tenant_access_token
+        isInIteration: false
+        outputs:
+          token:
+            children: null
+            type: string
+        selected: false
+        title: 解析飞书Token
+        type: code
+        variables:
+        - value_selector:
+          - http_token
+          - body
+          variable: body
+      height: 79
+      id: code_token
+      position:
+        x: 2549.209349375504
+        y: 121.33333333333334
+      positionAbsolute:
+        x: 2549.209349375504
+        y: 121.33333333333334
+      selected: false
+      sourcePosition: right
+      targetPosition: left
+      type: custom
+      width: 241
+      zIndex: 0
+    - data:
+        authorization:
+          config: null
+          type: no-auth
+        body:
+          data:
+          - type: text
+            value: '{"requests":[{"addSheet":{"properties":{"title":"{{#code_agg.sheet_title#}}"}}}]}'
+          type: json
+        continue_on_error: true
+        desc: 在固定统计表中新增本周期工作表
+        headers: Authorization:Bearer {{#code_token.token#}}
+        method: post
+        params: ''
+        retry_config:
+          max_retries: 3
+          retry_enabled: true
+          retry_interval: 100
+        selected: false
+        ssl_verify: true
+        timeout:
+          connect: 2
+          max_connect_timeout: 0
+          max_read_timeout: 0
+          max_write_timeout: 0
+          read: 2
+          write: 2
+        title: 新增半月工作表
+        type: http-request
+        url: https://open.feishu.cn/open-apis/sheets/v2/spreadsheets/QlJTseUX6h1mDFtX0NeclW8rn2h/sheets_batch_update
+        variables: []
+      height: 196
+      id: http_create
+      position:
+        x: 3113.0129173591226
+        y: 114.92577755124358
+      positionAbsolute:
+        x: 3113.0129173591226
+        y: 114.92577755124358
+      selected: false
+      sourcePosition: right
+      targetPosition: left
+      type: custom
+      width: 241
+      zIndex: 0
+    - data:
+        code: "import json\n\ndef main(query_body, body, sheet_title, body_range,\
+          \ header_only):\n    sid = \"\"\n    # 1. 先在现有sheet列表里找同周期（已存在则复用）\n   \
+          \ try:\n        q = json.loads(query_body) if isinstance(query_body, str)\
+          \ else (query_body or {})\n        sheets = (q.get(\"data\") or {}).get(\"\
+          sheets\") or []\n        for s in sheets:\n            if s.get(\"title\"\
+          ) == sheet_title:\n                sid = s.get(\"sheet_id\") or s.get(\"\
+          sheetId\") or \"\"\n                break\n    except Exception:\n     \
+          \   sid = \"\"\n    # 2. 未找到则用addSheet新建返回的sheetId\n    if not sid:\n  \
+          \      try:\n            b = json.loads(body) if isinstance(body, str) else\
+          \ body\n            r = (b.get(\"data\") or {}).get(\"replies\") or []\n\
+          \            props = r[0].get(\"addSheet\", {}).get(\"properties\", {})\
+          \ if r else {}\n            sid = props.get(\"sheetId\", \"\")\n       \
+          \ except Exception:\n            sid = \"\"\n    return {\n        \"sheet_id\"\
+          : sid,\n        \"sheet_range\": (\"%s!%s\" % (sid, body_range)) if sid\
+          \ else \"\",\n        \"header_range\": (\"%s!%s\" % (sid, header_only))\
+          \ if sid else \"\",\n    }"
+        code_language: python3
+        desc: 解析sheetId并拼接写入range
+        isInIteration: false
+        outputs:
+          header_range:
+            children: null
+            type: string
+          sheet_id:
+            children: null
+            type: string
+          sheet_range:
+            children: null
+            type: string
+        selected: false
+        title: 解析工作表ID
+        type: code
+        variables:
+        - value_selector:
+          - http_query
+          - body
+          variable: query_body
+        - value_selector:
+          - http_create
+          - body
+          variable: body
+        - value_selector:
+          - code_agg
+          - sheet_title
+          variable: sheet_title
+        - value_selector:
+          - code_agg
+          - body_range
+          variable: body_range
+        - value_selector:
+          - code_agg
+          - header_only
+          variable: header_only
+      height: 79
+      id: code_create
+      position:
+        x: 3392.3367677797373
+        y: 121.33333333333334
+      positionAbsolute:
+        x: 3392.3367677797373
+        y: 121.33333333333334
+      selected: false
+      sourcePosition: right
+      targetPosition: left
+      type: custom
+      width: 241
+      zIndex: 0
+    - data:
+        authorization:
+          config: null
+          type: no-auth
+        body:
+          data:
+          - type: text
+            value: '{"valueRanges":[{"range":"{{#code_create.sheet_id#}}!{{#code_merge.body_range#}}","values":{{#code_merge.values_json#}}}]}'
+          type: json
+        desc: 写入横向并排数据
+        headers: 'Authorization: Bearer {{#code_token.token#}}'
+        method: post
+        params: ''
+        retry_config:
+          max_retries: 3
+          retry_enabled: true
+          retry_interval: 100
+        selected: false
+        ssl_verify: true
+        timeout:
+          connect: 2
+          max_connect_timeout: 0
+          max_read_timeout: 0
+          max_write_timeout: 0
+          read: 3
+          write: 3
+        title: 写入统计表
+        type: http-request
+        url: https://open.feishu.cn/open-apis/sheets/v2/spreadsheets/QlJTseUX6h1mDFtX0NeclW8rn2h/values_batch_update
+        variables: []
+      height: 196
+      id: http_write
+      position:
+        x: 4225.439780660369
+        y: 121.33333333333334
+      positionAbsolute:
+        x: 4225.439780660369
+        y: 121.33333333333334
+      selected: false
+      sourcePosition: right
+      targetPosition: left
+      type: custom
+      width: 241
+      zIndex: 0
+    - data:
+        authorization:
+          config: null
+          type: no-auth
+        body:
+          data:
+          - type: text
+            value: '{"data":[{"ranges":["{{#code_create.header_range#}}"],"style":{"font":{"bold":true},"backColor":"#4472C4","foreColor":"#FFFFFF","hAlign":1,"vAlign":1}}]}'
+          type: json
+        desc: 表头蓝底白字加粗居中
+        headers: 'Authorization: Bearer {{#code_token.token#}}'
+        method: put
+        params: ''
+        retry_config:
+          max_retries: 3
+          retry_enabled: true
+          retry_interval: 100
+        selected: false
+        ssl_verify: true
+        timeout:
+          connect: 2
+          max_connect_timeout: 0
+          max_read_timeout: 0
+          max_write_timeout: 0
+          read: 3
+          write: 3
+        title: 设置表头样式
+        type: http-request
+        url: https://open.feishu.cn/open-apis/sheets/v2/spreadsheets/QlJTseUX6h1mDFtX0NeclW8rn2h/styles_batch_update
+        variables: []
+      height: 196
+      id: http_style
+      position:
+        x: 4520.260493514171
+        y: 141.6359422168243
+      positionAbsolute:
+        x: 4520.260493514171
+        y: 141.6359422168243
+      selected: false
+      sourcePosition: right
+      targetPosition: left
+      type: custom
+      width: 241
+      zIndex: 0
+    - data:
+        authorization:
+          config: null
+          type: no-auth
+        body:
+          data:
+          - type: text
+            value: '{"link_share_entity":"tenant_editable"}'
+          type: json
+        default_value:
+        - key: body
+          type: string
+          value: ''
+        - key: status_code
+          type: number
+          value: 0
+        - key: headers
+          type: object
+          value: '{}'
+        desc: 组织内获得链接的人可编辑（自动授权，无需手动添加应用）
+        error_strategy: default-value
+        headers: 'Authorization: Bearer {{#code_token.token#}}'
+        method: patch
+        params: ''
+        retry_config:
+          max_retries: 3
+          retry_enabled: true
+          retry_interval: 100
+        selected: false
+        ssl_verify: true
+        timeout:
+          connect: 2
+          max_connect_timeout: 0
+          max_read_timeout: 0
+          max_write_timeout: 0
+          read: 3
+          write: 3
+        title: 设置链接分享
+        type: http-request
+        url: https://open.feishu.cn/open-apis/drive/v1/permissions/QlJTseUX6h1mDFtX0NeclW8rn2h/public?type=sheet
+        variables: []
+      height: 248
+      id: http_share
+      position:
+        x: 4807.28
+        y: 155.1520000000001
+      positionAbsolute:
+        x: 4807.28
+        y: 155.1520000000001
+      selected: false
+      sourcePosition: right
+      targetPosition: left
+      type: custom
+      width: 241
+      zIndex: 0
+    - data:
+        desc: ''
+        outputs:
+        - value_selector:
+          - code_agg
+          - table_url
+          variable: table_url
+        - value_selector:
+          - code_agg
+          - sheet_title
+          variable: sheet_title
+        - value_selector:
+          - code_agg
+          - summary
+          variable: summary
+        selected: false
+        title: 结束
+        type: end
+      height: 141
+      id: end
+      position:
+        x: 5097.648
+        y: 155.1520000000001
+      positionAbsolute:
+        x: 5097.648
+        y: 155.1520000000001
+      selected: false
+      sourcePosition: right
+      targetPosition: left
+      type: custom
+      width: 241
+      zIndex: 0
+    - data:
+        authorization:
+          config: null
+          type: no-auth
+        body:
+          data: []
+          type: none
+        desc: ''
+        headers: 'Authorization: Bearer {{#code_token.token#}}'
+        method: get
+        params: ''
+        retry_config:
+          max_retries: 3
+          retry_enabled: true
+          retry_interval: 100
+        selected: false
+        ssl_verify: true
+        timeout:
+          connect: 2
+          max_connect_timeout: 0
+          max_read_timeout: 0
+          max_write_timeout: 0
+          read: 3
+          write: 3
+        title: 查询已有工作表
+        type: http-request
+        url: https://open.feishu.cn/open-apis/sheets/v3/spreadsheets/QlJTseUX6h1mDFtX0NeclW8rn2h/sheets/query
+        variables: []
+      height: 168
+      id: http_query
+      position:
+        x: 2829.1347071118953
+        y: 114.92577755124358
+      positionAbsolute:
+        x: 2829.1347071118953
+        y: 114.92577755124358
+      selected: false
+      sourcePosition: right
+      targetPosition: left
+      type: custom
+      width: 241
+      zIndex: 0
+    - data:
+        authorization:
+          config: null
+          type: no-auth
+        body:
+          data: []
+          type: none
+        continue_on_error: true
+        desc: ''
+        headers: 'Authorization: Bearer {{#code_token.token#}}'
+        method: get
+        params: ''
+        retry_config:
+          max_retries: 3
+          retry_enabled: true
+          retry_interval: 100
+        selected: false
+        ssl_verify: true
+        timeout:
+          connect: 2
+          max_connect_timeout: 0
+          max_read_timeout: 0
+          max_write_timeout: 0
+          read: 3
+          write: 3
+        title: 读取已有数据
+        type: http-request
+        url: https://open.feishu.cn/open-apis/sheets/v2/spreadsheets/QlJTseUX6h1mDFtX0NeclW8rn2h/values/{{#code_create.sheet_id#}}!A1:N500
+        variables: []
+      height: 186
+      id: http_read
+      position:
+        x: 3670
+        y: 114.9
+      positionAbsolute:
+        x: 3670
+        y: 114.9
+      selected: false
+      sourcePosition: right
+      targetPosition: left
+      type: custom
+      width: 241
+      zIndex: 0
+    - data:
+        code: "import json\nfrom collections import Counter, defaultdict\n\nCATS =\
+          \ [\"洗护用品\", \"鞋服\", \"食品保健\", \"美妆护肤\", \"百货\", \"数码家电\", \"箱包\"]\n\ndef\
+          \ ingest(grid, cnt):\n    if not grid:\n        return\n    for r in grid[1:]:\n\
+          \        if not isinstance(r, list):\n            continue\n        for\
+          \ i, cat in enumerate(CATS):\n            nc = i * 2\n            cc = i\
+          \ * 2 + 1\n            if nc < len(r):\n                name = r[nc]\n \
+          \               if name is not None and str(name).strip():\n           \
+          \         v = r[cc] if cc < len(r) else \"\"\n                    try:\n\
+          \                        n = int(float(v)) if v not in (\"\", None) else\
+          \ 1\n                    except Exception:\n                        n =\
+          \ 1\n                    cnt[(str(name).strip(), cat)] += n\n\ndef build(cnt):\n\
+          \    by = defaultdict(list)\n    for (name, cat), n in cnt.items():\n  \
+          \      by[cat].append((name, n))\n    for cat in by:\n        by[cat].sort(key=lambda\
+          \ x: (-x[1], x[0]))\n    maxrows = max([len(by[c]) for c in CATS] + [1])\n\
+          \    header = []\n    for c in CATS:\n        header += [c, \"许愿人次\"]\n\
+          \    rows = [header]\n    for i in range(maxrows):\n        rr = []\n  \
+          \      for c in CATS:\n            if i < len(by[c]):\n                rr\
+          \ += [by[c][i][0], by[c][i][1]]\n            else:\n                rr +=\
+          \ [\"\", \"\"]\n        rows.append(rr)\n    return rows\n\ndef main(new_values,\
+          \ read_body):\n    cnt = Counter()\n    try:\n        ingest(json.loads(new_values),\
+          \ cnt)\n    except Exception:\n        pass\n    try:\n        b = json.loads(read_body)\
+          \ if isinstance(read_body, str) else read_body\n        old = (b.get(\"\
+          data\", {}).get(\"valueRange\", {}) or {}).get(\"values\", [])\n       \
+          \ ingest(old, cnt)\n    except Exception:\n        pass\n    rows = build(cnt)\n\
+          \    return {\n        \"values_json\": json.dumps(rows, ensure_ascii=False),\n\
+          \        \"body_range\": \"A1:N%d\" % len(rows),\n        \"header_only\"\
+          : \"A1:N1\",\n        \"rows_n\": len(rows),\n    }"
+        code_language: python3
+        desc: 把已有数据与本次提取累加合并，生成最终表格
+        isInIteration: false
+        outputs:
+          body_range:
+            children: null
+            type: string
+          header_only:
+            children: null
+            type: string
+          rows_n:
+            children: null
+            type: number
+          values_json:
+            children: null
+            type: string
+        selected: false
+        title: 合并新旧数据
+        type: code
+        variables:
+        - value_selector:
+          - code_agg
+          - values_json
+          variable: new_values
+        - value_selector:
+          - http_read
+          - body
+          variable: read_body
+      height: 95
+      id: code_merge
+      position:
+        x: 3950
+        y: 121.3
+      positionAbsolute:
+        x: 3950
+        y: 121.3
+      selected: false
+      sourcePosition: right
+      targetPosition: left
+      type: custom
+      width: 241
+      zIndex: 0
+    viewport:
+      x: -1286.9578687785543
+      y: 221.21383711610997
+      zoom: 0.4352752816480619
+  rag_pipeline_variables: []
