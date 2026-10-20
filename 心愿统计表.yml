@@ -23,7 +23,7 @@ workflow:
     selector:
     - env
     - FEISHU_APP_ID
-    value: cli_aa5f39c03a63dc02
+    value: ''
     value_type: string
   - description: 飞书自建应用 App Secret
     id: f9488999-3b89-4791-b035-14c5dd357681
@@ -31,8 +31,16 @@ workflow:
     selector:
     - env
     - FEISHU_APP_SECRET
-    value: ""
+    value: ''
     value_type: secret
+  - description: 飞书电子表格 ID（spreadsheet token）
+    id: 667b4255-9383-4949-afaa-b0af27657b08
+    name: FEISHU_SPREADSHEET_TOKEN
+    selector:
+    - env
+    - FEISHU_SPREADSHEET_TOKEN
+    value: ''
+    value_type: string
   features:
     file_upload:
       allowed_file_extensions: []
@@ -372,8 +380,7 @@ workflow:
           role: system
           text: '你是电商心愿照片识别助手。只针对照片中“许愿人本人想要”的那件商品，输出一行商品描述，不要解释、不要 JSON。
 
-            输出顺序：品牌（中英文都写，如“COACH 蔻驰”）+ 系列或型号（仅当图中出现明确文字时才写，例如页面标题、吊牌、包装；图中没有就省略，严禁猜测或编造）+
-            品类 + 颜色 + 材质或花纹 + 款式（单肩/斜挎/手提等）+ 尺寸（仅当图中有人物或参照物可比较时写小/中/大，否则省略）。
+            输出顺序：品牌（中英文都写，如“COACH 蔻驰”）+ 系列或型号（仅当图中出现明确文字时才写，例如页面标题、吊牌、包装；图中没有就省略，严禁猜测或编造）+ 品类 + 颜色 + 材质或花纹 + 款式（单肩/斜挎/手提等）+ 尺寸（仅当图中有人物或参照物可比较时写小/中/大，否则省略）。
 
             能看清的限定词必须全部保留，不要概括成“包”“鞋”“衣服”这类大类。
 
@@ -438,39 +445,7 @@ workflow:
       width: 241
       zIndex: 0
     - data:
-        code: "import json\n\ndef main(text, ocr, doc_text, period):\n    msgs = []\n\
-          \    if doc_text and str(doc_text).strip():\n        for s in parse_md_table(str(doc_text)):\n\
-          \            if s:\n                msgs.append({\"text\": s, \"source\"\
-          : \"Excel导入\"})\n    if ocr and str(ocr).strip():\n        for line in [str(ocr).strip()]:\n\
-          \            line = line.strip()\n            if line:\n               \
-          \ msgs.append({\"text\": line, \"source\": \"照片\"})\n    if text and str(text).strip():\n\
-          \        for line in str(text).splitlines():\n            line = line.strip()\n\
-          \            if line:\n                msgs.append({\"text\": line, \"source\"\
-          : \"手动文字\"})\n    chunks = []\n    for i in range(0, len(msgs), 20):\n \
-          \       chunks.append(json.dumps(msgs[i:i+20], ensure_ascii=False))\n  \
-          \  if not chunks:\n        chunks = [json.dumps([], ensure_ascii=False)]\n\
-          \    if any(m[\"source\"] == \"Excel导入\" for m in msgs):\n        source\
-          \ = \"Excel导入\"\n    elif any(m[\"source\"] == \"照片\" for m in msgs):\n\
-          \        source = \"照片\"\n    else:\n        source = \"手动文字\"\n    return\
-          \ {\"chunks\": chunks, \"source\": source, \"count\": len(msgs)}\n\ndef\
-          \ split_row(l):\n    parts = l.split(\"|\")\n    if parts and parts[0].strip()\
-          \ == \"\":\n        parts = parts[1:]\n    if parts and parts[-1].strip()\
-          \ == \"\":\n        parts = parts[:-1]\n    return parts\n\ndef parse_md_table(t):\n\
-          \    lines = [l.strip() for l in t.splitlines() if l.strip()]\n    header_idx\
-          \ = None\n    for i, l in enumerate(lines):\n        if l.startswith(\"\
-          |\") and \"|\" in l[1:]:\n            header_idx = i\n            break\n\
-          \    if header_idx is None:\n        return [l for l in lines]\n    target\
-          \ = None\n    for j, c in enumerate(split_row(lines[header_idx])):\n   \
-          \     if c.strip() in (\"心愿描述\", \"心愿\", \"描述\"):\n            target =\
-          \ j\n    start = header_idx + 1\n    if start < len(lines):\n        sep\
-          \ = lines[start].replace(\"|\", \"\").replace(\"-\", \"\").replace(\":\"\
-          , \"\").replace(\" \", \"\")\n        if sep == \"\":\n            start\
-          \ += 1\n    out = []\n    for l in lines[start:]:\n        if not l.startswith(\"\
-          |\"):\n            continue\n        cs = split_row(l)\n        if target\
-          \ is not None and target < len(cs):\n            v = cs[target].strip()\n\
-          \            if v:\n                out.append(v)\n        else:\n     \
-          \       row = \" \".join(x.strip() for x in cs if x.strip())\n         \
-          \   if row:\n                out.append(row)\n    return out"
+        code: "import json\n\ndef main(text, ocr, doc_text, period):\n    msgs = []\n    if doc_text and str(doc_text).strip():\n        for s in parse_md_table(str(doc_text)):\n            if s:\n                msgs.append({\"text\": s, \"source\": \"Excel导入\"})\n    if ocr and str(ocr).strip():\n        for line in [str(ocr).strip()]:\n            line = line.strip()\n            if line:\n                msgs.append({\"text\": line, \"source\": \"照片\"})\n    if text and str(text).strip():\n        for line in str(text).splitlines():\n            line = line.strip()\n            if line:\n                msgs.append({\"text\": line, \"source\": \"手动文字\"})\n    chunks = []\n    for i in range(0, len(msgs), 20):\n        chunks.append(json.dumps(msgs[i:i+20], ensure_ascii=False))\n    if not chunks:\n        chunks = [json.dumps([], ensure_ascii=False)]\n    if any(m[\"source\"] == \"Excel导入\" for m in msgs):\n        source = \"Excel导入\"\n    elif any(m[\"source\"] == \"照片\" for m in msgs):\n        source = \"照片\"\n    else:\n        source = \"手动文字\"\n    return {\"chunks\": chunks, \"source\": source, \"count\": len(msgs)}\n\ndef split_row(l):\n    parts = l.split(\"|\")\n    if parts and parts[0].strip() == \"\":\n        parts = parts[1:]\n    if parts and parts[-1].strip() == \"\":\n        parts = parts[:-1]\n    return parts\n\ndef parse_md_table(t):\n    lines = [l.strip() for l in t.splitlines() if l.strip()]\n    header_idx = None\n    for i, l in enumerate(lines):\n        if l.startswith(\"|\") and \"|\" in l[1:]:\n            header_idx = i\n            break\n    if header_idx is None:\n        return [l for l in lines]\n    target = None\n    for j, c in enumerate(split_row(lines[header_idx])):\n        if c.strip() in (\"心愿描述\", \"心愿\", \"描述\"):\n            target = j\n    start = header_idx + 1\n    if start < len(lines):\n        sep = lines[start].replace(\"|\", \"\").replace(\"-\", \"\").replace(\":\", \"\").replace(\" \", \"\")\n        if sep == \"\":\n            start += 1\n    out = []\n    for l in lines[start:]:\n        if not l.startswith(\"|\"):\n            continue\n        cs = split_row(l)\n        if target is not None and target < len(cs):\n            v = cs[target].strip()\n            if v:\n                out.append(v)\n        else:\n            row = \" \".join(x.strip() for x in cs if x.strip())\n            if row:\n                out.append(row)\n    return out"
         code_language: python3
         desc: 统一解析三种输入并每20条切一批
         isInIteration: false
@@ -607,8 +582,7 @@ workflow:
             4. 场景/季节/场合删除，且场景不构成商品区分时合并核心词：徒步冲锋衣、户外冲锋衣→冲锋衣；旅游护颈枕→护颈枕；秋冬打底袜→打底袜。已成为商品名一部分的保留（滑雪镜、露营车、运动鞋）。
 
 
-            5. 一句话可含多个物品，分别提取；同一句内重复物品只算一次。但品牌、型号、颜色、规格、款式属于同一个商品名，必须合并成一个物品，不能拆成多个
-            items；只有用“和/、/还有”明确并列的不同商品才拆开。
+            5. 一句话可含多个物品，分别提取；同一句内重复物品只算一次。但品牌、型号、颜色、规格、款式属于同一个商品名，必须合并成一个物品，不能拆成多个 items；只有用“和/、/还有”明确并列的不同商品才拆开。
 
 
             6. 没有明确物品（纯夸赞、售后、建议、问链接）时 items 返回 []。
@@ -629,8 +603,7 @@ workflow:
 
             - 来源是照片时，不要概括成“包/鞋/衣服”这类大类，也不要删掉颜色、材质、款式。
 
-            示例：gregory格里高利 Amber系列徒步登山双肩包男女同款 苔藓绿 34L → 格里高利 Amber系列双肩包 苔藓绿 34L；COACH
-            蔻驰 单肩斜挎包 棕色 PVC 经典C字老花 中号 → 蔻驰 棕色 PVC 老花 单肩斜挎包 中号。
+            示例：gregory格里高利 Amber系列徒步登山双肩包男女同款 苔藓绿 34L → 格里高利 Amber系列双肩包 苔藓绿 34L；COACH 蔻驰 单肩斜挎包 棕色 PVC 经典C字老花 中号 → 蔻驰 棕色 PVC 老花 单肩斜挎包 中号。
 
 
             七分类（名称必须完全一致）：
@@ -698,66 +671,7 @@ workflow:
       width: 241
       zIndex: 1001
     - data:
-        code: "import json\nimport re\nimport datetime\nfrom collections import Counter,\
-          \ defaultdict\n\nCATS = [\"洗护用品\", \"鞋服\", \"食品保健\", \"美妆护肤\", \"百货\", \"\
-          数码家电\", \"箱包\"]\n\ndef to_period(p):\n    s = (p or '').strip()\n    if\
-          \ re.match(r'^\\d{1,2}\\.\\d{1,2}-\\d{1,2}\\.\\d{1,2}$', s):\n        return\
-          \ s\n    y = mo = dd = None\n    m = re.match(r'^(\\d{4})[-/.](\\d{1,2})[-/.](\\\
-          d{1,2})', s)\n    if m:\n        y, mo, dd = int(m.group(1)), int(m.group(2)),\
-          \ int(m.group(3))\n    else:\n        m2 = re.match(r'^(\\d{1,2})[-/.](\\\
-          d{1,2})$', s)\n        if m2:\n            mo, dd = int(m2.group(1)), int(m2.group(2))\n\
-          \            y = datetime.datetime.now(datetime.timezone(datetime.timedelta(hours=8))).year\n\
-          \    if not mo and not s:\n        now = datetime.datetime.now(datetime.timezone(datetime.timedelta(hours=8)))\n\
-          \        y, mo, dd = now.year, now.month, now.day\n    if mo:\n        days\
-          \ = [31,28,31,30,31,30,31,31,30,31,30,31]\n        if mo == 2 and ((y %\
-          \ 4 == 0 and y % 100 != 0) or y % 400 == 0):\n            days[1] = 29\n\
-          \        if dd <= 15:\n            return '%d.1-%d.15' % (mo, mo)\n    \
-          \    return '%d.16-%d.%d' % (mo, mo, days[mo-1])\n    return s or '未命名'\n\
-          \ndef extract_json(raw):\n    if not isinstance(raw, str):\n        return\
-          \ raw\n    s = raw.strip()\n    fence = re.search(r'```(?:json)?\\s*(.*?)```',\
-          \ s, re.S)\n    if fence:\n        s = fence.group(1).strip()\n    try:\n\
-          \        return json.loads(s)\n    except Exception:\n        pass\n   \
-          \ s = re.sub(r'<think\\b[^>]*>.*?</think>', '', s, flags=re.S)\n    s =\
-          \ s.replace('<!--dify-deepseek-reasoning-->', '')\n    first, last = s.find('['),\
-          \ s.rfind(']')\n    if first != -1 and last > first:\n        try:\n   \
-          \         return json.loads(s[first:last+1])\n        except Exception:\n\
-          \            pass\n    first, last = s.find('{'), s.rfind('}')\n    if first\
-          \ != -1 and last > first:\n        try:\n            return json.loads(s[first:last+1])\n\
-          \        except Exception:\n            pass\n    return None\n\ndef _canon(name):\n\
-          \    s = (name or '').strip()\n    if '格里高利' in s:\n        s = s.replace('gregory',\
-          \ '').replace('GREGORY', '')\n    for w in ['男女同款', '徒步登山', '同款', '户外',\
-          \ '的']:\n        s = s.replace(w, '')\n    s = re.sub(r'\\s*(苔藓绿|黑色|白色|粉色|蓝色|绿色|红色|灰色|米色|棕色|黄色|紫色|橙色)\\\
-          s*', ' ', s)\n    s = re.sub(r'\\s*\\d+(?:\\.\\d+)?\\s*(?:L|升|ml|ML|cm|CM|寸|码)',\
-          \ ' ', s)\n    s = re.sub(r'\\s+', ' ', s).strip()\n    return s\n\ndef\
-          \ _add_item(cnt, name, cat):\n    name = _canon(name)\n    cat = (cat or\
-          \ '').strip()\n    if name and cat in CATS:\n        cnt[(name, cat)] +=\
-          \ 1\n\ndef main(batches, period, source):\n    cnt = Counter()\n    for\
-          \ b in (batches or []):\n        arr = extract_json(b)\n        if arr is\
-          \ None:\n            continue\n        if isinstance(arr, dict):\n     \
-          \       arr = [arr]\n        if not isinstance(arr, list):\n           \
-          \ continue\n        for row in arr:\n            if not isinstance(row,\
-          \ dict):\n                continue\n            items = row.get('items')\n\
-          \            if items is None:\n                _add_item(cnt, row.get('name')\
-          \ or row.get('text'), row.get('category'))\n                continue\n \
-          \           for it in items:\n                if isinstance(it, dict):\n\
-          \                    _add_item(cnt, it.get('name') or it.get('text'), it.get('category'))\n\
-          \    by = defaultdict(list)\n    for (name, cat), n in cnt.items():\n  \
-          \      by[cat].append((name, n))\n    for cat in by:\n        by[cat].sort(key=lambda\
-          \ x: (-x[1], x[0]))\n    maxrows = max([len(by[c]) for c in CATS] + [1])\n\
-          \    header = []\n    for c in CATS:\n        header += [c, \"许愿人次\"]\n\
-          \    rows = [header]\n    for i in range(maxrows):\n        r = []\n   \
-          \     for c in CATS:\n            if i < len(by[c]):\n                r\
-          \ += [by[c][i][0], by[c][i][1]]\n            else:\n                r +=\
-          \ [\"\", \"\"]\n        rows.append(r)\n    while len(rows) < 121:\n   \
-          \     rows.append([\"\"] * 14)\n    total = sum(cnt.values())\n    kinds\
-          \ = len(cnt)\n    sn = to_period(period)\n    body_range = \"A1:N%d\" %\
-          \ len(rows)\n    header_only = \"A1:N1\"\n    table_url = \"https://my.feishu.cn/sheets/QlJTseUX6h1mDFtX0NeclW8rn2h\"\
-          \n    summary = \"半月周期：%s\\n物品种类：%d\\n总许愿人次：%d\\n统计表：%s\" % (sn, kinds,\
-          \ total, table_url)\n    return {\n        \"values_json\": json.dumps(rows,\
-          \ ensure_ascii=False),\n        \"body_range\": body_range,\n        \"\
-          header_only\": header_only,\n        \"sheet_title\": sn,\n        \"table_url\"\
-          : table_url,\n        \"summary\": summary,\n        \"total\": total,\n\
-          \        \"kinds\": kinds,\n    }\n"
+        code: "import json\nimport re\nimport datetime\nfrom collections import Counter, defaultdict\n\nCATS = [\"洗护用品\", \"鞋服\", \"食品保健\", \"美妆护肤\", \"百货\", \"数码家电\", \"箱包\"]\n\ndef to_period(p):\n    s = (p or '').strip()\n    if re.match(r'^\\d{1,2}\\.\\d{1,2}-\\d{1,2}\\.\\d{1,2}$', s):\n        return s\n    y = mo = dd = None\n    m = re.match(r'^(\\d{4})[-/.](\\d{1,2})[-/.](\\d{1,2})', s)\n    if m:\n        y, mo, dd = int(m.group(1)), int(m.group(2)), int(m.group(3))\n    else:\n        m2 = re.match(r'^(\\d{1,2})[-/.](\\d{1,2})$', s)\n        if m2:\n            mo, dd = int(m2.group(1)), int(m2.group(2))\n            y = datetime.datetime.now(datetime.timezone(datetime.timedelta(hours=8))).year\n    if not mo and not s:\n        now = datetime.datetime.now(datetime.timezone(datetime.timedelta(hours=8)))\n        y, mo, dd = now.year, now.month, now.day\n    if mo:\n        days = [31,28,31,30,31,30,31,31,30,31,30,31]\n        if mo == 2 and ((y % 4 == 0 and y % 100 != 0) or y % 400 == 0):\n            days[1] = 29\n        if dd <= 15:\n            return '%d.1-%d.15' % (mo, mo)\n        return '%d.16-%d.%d' % (mo, mo, days[mo-1])\n    return s or '未命名'\n\ndef extract_json(raw):\n    if not isinstance(raw, str):\n        return raw\n    s = raw.strip()\n    fence = re.search(r'```(?:json)?\\s*(.*?)```', s, re.S)\n    if fence:\n        s = fence.group(1).strip()\n    try:\n        return json.loads(s)\n    except Exception:\n        pass\n    s = re.sub(r'<think\\b[^>]*>.*?</think>', '', s, flags=re.S)\n    s = s.replace('<!--dify-deepseek-reasoning-->', '')\n    first, last = s.find('['), s.rfind(']')\n    if first != -1 and last > first:\n        try:\n            return json.loads(s[first:last+1])\n        except Exception:\n            pass\n    first, last = s.find('{'), s.rfind('}')\n    if first != -1 and last > first:\n        try:\n            return json.loads(s[first:last+1])\n        except Exception:\n            pass\n    return None\n\ndef _canon(name):\n    s = (name or '').strip()\n    if '格里高利' in s:\n        s = s.replace('gregory', '').replace('GREGORY', '')\n    for w in ['男女同款', '徒步登山', '同款', '户外', '的']:\n        s = s.replace(w, '')\n    s = re.sub(r'\\s*(苔藓绿|黑色|白色|粉色|蓝色|绿色|红色|灰色|米色|棕色|黄色|紫色|橙色)\\s*', ' ', s)\n    s = re.sub(r'\\s*\\d+(?:\\.\\d+)?\\s*(?:L|升|ml|ML|cm|CM|寸|码)', ' ', s)\n    s = re.sub(r'\\s+', ' ', s).strip()\n    return s\n\ndef _add_item(cnt, name, cat):\n    name = _canon(name)\n    cat = (cat or '').strip()\n    if name and cat in CATS:\n        cnt[(name, cat)] += 1\n\ndef main(batches, period, source, sheet_token):\n    cnt = Counter()\n    for b in (batches or []):\n        arr = extract_json(b)\n        if arr is None:\n            continue\n        if isinstance(arr, dict):\n            arr = [arr]\n        if not isinstance(arr, list):\n            continue\n        for row in arr:\n            if not isinstance(row, dict):\n                continue\n            items = row.get('items')\n            if items is None:\n                _add_item(cnt, row.get('name') or row.get('text'), row.get('category'))\n                continue\n            for it in items:\n                if isinstance(it, dict):\n                    _add_item(cnt, it.get('name') or it.get('text'), it.get('category'))\n    by = defaultdict(list)\n    for (name, cat), n in cnt.items():\n        by[cat].append((name, n))\n    for cat in by:\n        by[cat].sort(key=lambda x: (-x[1], x[0]))\n    maxrows = max([len(by[c]) for c in CATS] + [1])\n    header = []\n    for c in CATS:\n        header += [c, \"许愿人次\"]\n    rows = [header]\n    for i in range(maxrows):\n        r = []\n        for c in CATS:\n            if i < len(by[c]):\n                r += [by[c][i][0], by[c][i][1]]\n            else:\n                r += [\"\", \"\"]\n        rows.append(r)\n    while len(rows) < 121:\n        rows.append([\"\"] * 14)\n    total = sum(cnt.values())\n    kinds = len(cnt)\n    sn = to_period(period)\n    body_range = \"A1:N%d\" % len(rows)\n    header_only = \"A1:N1\"\n    table_url = \"https://my.feishu.cn/sheets/\" + (sheet_token or \"\")\n    summary = \"半月周期：%s\\n物品种类：%d\\n总许愿人次：%d\\n统计表：%s\" % (sn, kinds, total, table_url)\n    return {\n        \"values_json\": json.dumps(rows, ensure_ascii=False),\n        \"body_range\": body_range,\n        \"header_only\": header_only,\n        \"sheet_title\": sn,\n        \"table_url\": table_url,\n        \"summary\": summary,\n        \"total\": total,\n        \"kinds\": kinds,\n    }\n"
         code_language: python3
         desc: 聚合计数并生成横向并排二维数组
         isInIteration: false
@@ -802,6 +716,10 @@ workflow:
           - code_parse
           - source
           variable: source
+        - value_selector:
+          - env
+          - FEISHU_SPREADSHEET_TOKEN
+          variable: sheet_token
       height: 79
       id: code_agg
       position:
@@ -861,10 +779,7 @@ workflow:
       width: 241
       zIndex: 0
     - data:
-        code: "import json\n\ndef main(body):\n    try:\n        b = json.loads(body)\
-          \ if isinstance(body, str) else body\n        token = b.get(\"tenant_access_token\"\
-          , \"\") if isinstance(b, dict) else \"\"\n    except Exception:\n      \
-          \  token = \"\"\n    return {\"token\": token}"
+        code: "import json\n\ndef main(body):\n    try:\n        b = json.loads(body) if isinstance(body, str) else body\n        token = b.get(\"tenant_access_token\", \"\") if isinstance(b, dict) else \"\"\n    except Exception:\n        token = \"\"\n    return {\"token\": token}"
         code_language: python3
         desc: 从Token响应中解析 tenant_access_token
         isInIteration: false
@@ -923,7 +838,7 @@ workflow:
           write: 2
         title: 新增半月工作表
         type: http-request
-        url: https://open.feishu.cn/open-apis/sheets/v2/spreadsheets/QlJTseUX6h1mDFtX0NeclW8rn2h/sheets_batch_update
+        url: https://open.feishu.cn/open-apis/sheets/v2/spreadsheets/{{#env.FEISHU_SPREADSHEET_TOKEN#}}/sheets_batch_update
         variables: []
       height: 196
       id: http_create
@@ -940,22 +855,7 @@ workflow:
       width: 241
       zIndex: 0
     - data:
-        code: "import json\n\ndef main(query_body, body, sheet_title, body_range,\
-          \ header_only):\n    sid = \"\"\n    # 1. 先在现有sheet列表里找同周期（已存在则复用）\n   \
-          \ try:\n        q = json.loads(query_body) if isinstance(query_body, str)\
-          \ else (query_body or {})\n        sheets = (q.get(\"data\") or {}).get(\"\
-          sheets\") or []\n        for s in sheets:\n            if s.get(\"title\"\
-          ) == sheet_title:\n                sid = s.get(\"sheet_id\") or s.get(\"\
-          sheetId\") or \"\"\n                break\n    except Exception:\n     \
-          \   sid = \"\"\n    # 2. 未找到则用addSheet新建返回的sheetId\n    if not sid:\n  \
-          \      try:\n            b = json.loads(body) if isinstance(body, str) else\
-          \ body\n            r = (b.get(\"data\") or {}).get(\"replies\") or []\n\
-          \            props = r[0].get(\"addSheet\", {}).get(\"properties\", {})\
-          \ if r else {}\n            sid = props.get(\"sheetId\", \"\")\n       \
-          \ except Exception:\n            sid = \"\"\n    return {\n        \"sheet_id\"\
-          : sid,\n        \"sheet_range\": (\"%s!%s\" % (sid, body_range)) if sid\
-          \ else \"\",\n        \"header_range\": (\"%s!%s\" % (sid, header_only))\
-          \ if sid else \"\",\n    }"
+        code: "import json\n\ndef main(query_body, body, sheet_title, body_range, header_only):\n    sid = \"\"\n    # 1. 先在现有sheet列表里找同周期（已存在则复用）\n    try:\n        q = json.loads(query_body) if isinstance(query_body, str) else (query_body or {})\n        sheets = (q.get(\"data\") or {}).get(\"sheets\") or []\n        for s in sheets:\n            if s.get(\"title\") == sheet_title:\n                sid = s.get(\"sheet_id\") or s.get(\"sheetId\") or \"\"\n                break\n    except Exception:\n        sid = \"\"\n    # 2. 未找到则用addSheet新建返回的sheetId\n    if not sid:\n        try:\n            b = json.loads(body) if isinstance(body, str) else body\n            r = (b.get(\"data\") or {}).get(\"replies\") or []\n            props = r[0].get(\"addSheet\", {}).get(\"properties\", {}) if r else {}\n            sid = props.get(\"sheetId\", \"\")\n        except Exception:\n            sid = \"\"\n    return {\n        \"sheet_id\": sid,\n        \"sheet_range\": (\"%s!%s\" % (sid, body_range)) if sid else \"\",\n        \"header_range\": (\"%s!%s\" % (sid, header_only)) if sid else \"\",\n    }"
         code_language: python3
         desc: 解析sheetId并拼接写入range
         isInIteration: false
@@ -1035,7 +935,7 @@ workflow:
           write: 3
         title: 写入统计表
         type: http-request
-        url: https://open.feishu.cn/open-apis/sheets/v2/spreadsheets/QlJTseUX6h1mDFtX0NeclW8rn2h/values_batch_update
+        url: https://open.feishu.cn/open-apis/sheets/v2/spreadsheets/{{#env.FEISHU_SPREADSHEET_TOKEN#}}/values_batch_update
         variables: []
       height: 196
       id: http_write
@@ -1079,7 +979,7 @@ workflow:
           write: 3
         title: 设置表头样式
         type: http-request
-        url: https://open.feishu.cn/open-apis/sheets/v2/spreadsheets/QlJTseUX6h1mDFtX0NeclW8rn2h/styles_batch_update
+        url: https://open.feishu.cn/open-apis/sheets/v2/spreadsheets/{{#env.FEISHU_SPREADSHEET_TOKEN#}}/styles_batch_update
         variables: []
       height: 196
       id: http_style
@@ -1134,7 +1034,7 @@ workflow:
           write: 3
         title: 设置链接分享
         type: http-request
-        url: https://open.feishu.cn/open-apis/drive/v1/permissions/QlJTseUX6h1mDFtX0NeclW8rn2h/public?type=sheet
+        url: https://open.feishu.cn/open-apis/drive/v1/permissions/{{#env.FEISHU_SPREADSHEET_TOKEN#}}/public?type=sheet
         variables: []
       height: 248
       id: http_share
@@ -1208,7 +1108,7 @@ workflow:
           write: 3
         title: 查询已有工作表
         type: http-request
-        url: https://open.feishu.cn/open-apis/sheets/v3/spreadsheets/QlJTseUX6h1mDFtX0NeclW8rn2h/sheets/query
+        url: https://open.feishu.cn/open-apis/sheets/v3/spreadsheets/{{#env.FEISHU_SPREADSHEET_TOKEN#}}/sheets/query
         variables: []
       height: 168
       id: http_query
@@ -1251,7 +1151,7 @@ workflow:
           write: 3
         title: 读取已有数据
         type: http-request
-        url: https://open.feishu.cn/open-apis/sheets/v2/spreadsheets/QlJTseUX6h1mDFtX0NeclW8rn2h/values/{{#code_create.sheet_id#}}!A1:N500
+        url: https://open.feishu.cn/open-apis/sheets/v2/spreadsheets/{{#env.FEISHU_SPREADSHEET_TOKEN#}}/values/{{#code_create.sheet_id#}}!A1:N500
         variables: []
       height: 186
       id: http_read
@@ -1268,33 +1168,7 @@ workflow:
       width: 241
       zIndex: 0
     - data:
-        code: "import json\nfrom collections import Counter, defaultdict\n\nCATS =\
-          \ [\"洗护用品\", \"鞋服\", \"食品保健\", \"美妆护肤\", \"百货\", \"数码家电\", \"箱包\"]\n\ndef\
-          \ ingest(grid, cnt):\n    if not grid:\n        return\n    for r in grid[1:]:\n\
-          \        if not isinstance(r, list):\n            continue\n        for\
-          \ i, cat in enumerate(CATS):\n            nc = i * 2\n            cc = i\
-          \ * 2 + 1\n            if nc < len(r):\n                name = r[nc]\n \
-          \               if name is not None and str(name).strip():\n           \
-          \         v = r[cc] if cc < len(r) else \"\"\n                    try:\n\
-          \                        n = int(float(v)) if v not in (\"\", None) else\
-          \ 1\n                    except Exception:\n                        n =\
-          \ 1\n                    cnt[(str(name).strip(), cat)] += n\n\ndef build(cnt):\n\
-          \    by = defaultdict(list)\n    for (name, cat), n in cnt.items():\n  \
-          \      by[cat].append((name, n))\n    for cat in by:\n        by[cat].sort(key=lambda\
-          \ x: (-x[1], x[0]))\n    maxrows = max([len(by[c]) for c in CATS] + [1])\n\
-          \    header = []\n    for c in CATS:\n        header += [c, \"许愿人次\"]\n\
-          \    rows = [header]\n    for i in range(maxrows):\n        rr = []\n  \
-          \      for c in CATS:\n            if i < len(by[c]):\n                rr\
-          \ += [by[c][i][0], by[c][i][1]]\n            else:\n                rr +=\
-          \ [\"\", \"\"]\n        rows.append(rr)\n    return rows\n\ndef main(new_values,\
-          \ read_body):\n    cnt = Counter()\n    try:\n        ingest(json.loads(new_values),\
-          \ cnt)\n    except Exception:\n        pass\n    try:\n        b = json.loads(read_body)\
-          \ if isinstance(read_body, str) else read_body\n        old = (b.get(\"\
-          data\", {}).get(\"valueRange\", {}) or {}).get(\"values\", [])\n       \
-          \ ingest(old, cnt)\n    except Exception:\n        pass\n    rows = build(cnt)\n\
-          \    return {\n        \"values_json\": json.dumps(rows, ensure_ascii=False),\n\
-          \        \"body_range\": \"A1:N%d\" % len(rows),\n        \"header_only\"\
-          : \"A1:N1\",\n        \"rows_n\": len(rows),\n    }"
+        code: "import json\nfrom collections import Counter, defaultdict\n\nCATS = [\"洗护用品\", \"鞋服\", \"食品保健\", \"美妆护肤\", \"百货\", \"数码家电\", \"箱包\"]\n\ndef ingest(grid, cnt):\n    if not grid:\n        return\n    for r in grid[1:]:\n        if not isinstance(r, list):\n            continue\n        for i, cat in enumerate(CATS):\n            nc = i * 2\n            cc = i * 2 + 1\n            if nc < len(r):\n                name = r[nc]\n                if name is not None and str(name).strip():\n                    v = r[cc] if cc < len(r) else \"\"\n                    try:\n                        n = int(float(v)) if v not in (\"\", None) else 1\n                    except Exception:\n                        n = 1\n                    cnt[(str(name).strip(), cat)] += n\n\ndef build(cnt):\n    by = defaultdict(list)\n    for (name, cat), n in cnt.items():\n        by[cat].append((name, n))\n    for cat in by:\n        by[cat].sort(key=lambda x: (-x[1], x[0]))\n    maxrows = max([len(by[c]) for c in CATS] + [1])\n    header = []\n    for c in CATS:\n        header += [c, \"许愿人次\"]\n    rows = [header]\n    for i in range(maxrows):\n        rr = []\n        for c in CATS:\n            if i < len(by[c]):\n                rr += [by[c][i][0], by[c][i][1]]\n            else:\n                rr += [\"\", \"\"]\n        rows.append(rr)\n    return rows\n\ndef main(new_values, read_body):\n    cnt = Counter()\n    try:\n        ingest(json.loads(new_values), cnt)\n    except Exception:\n        pass\n    try:\n        b = json.loads(read_body) if isinstance(read_body, str) else read_body\n        old = (b.get(\"data\", {}).get(\"valueRange\", {}) or {}).get(\"values\", [])\n        ingest(old, cnt)\n    except Exception:\n        pass\n    rows = build(cnt)\n    return {\n        \"values_json\": json.dumps(rows, ensure_ascii=False),\n        \"body_range\": \"A1:N%d\" % len(rows),\n        \"header_only\": \"A1:N1\",\n        \"rows_n\": len(rows),\n    }"
         code_language: python3
         desc: 把已有数据与本次提取累加合并，生成最终表格
         isInIteration: false
